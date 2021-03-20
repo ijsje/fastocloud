@@ -1,0 +1,33 @@
+1.2.5 / March 13, 2021
+[Alexandr Topilski]
+- Ini section
+
+1.2.4 / January 30, 2021
+[Alexandr Topilski]
+- PyFastoStream integration
+
+1.2.3 / January 16, 2021
+[Alexandr Topilski]
+- Kill stream command
+
+1.2.2 / January 2, 2021
+[Alexandr Topilski]
+- Bitrates fixes
+
+1.2.1 / December 18, 2020
+[Alexandr Topilski]
+- Stabilization
+- Back to opensource
+
+1.1.1 / June 20, 2020
+[Alexandr Topilski]
+- DVB source
+- Stabilization
+
+1.1.0 / April 21, 2020
+[Alexandr Topilski]
+- Otional fields
+
+1.0.0 / March 20, 2020
+[Alexandr Topilski]
+- Init release

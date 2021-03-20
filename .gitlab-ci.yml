@@ -1,0 +1,18 @@
+image: debian:buster-slim
+
+stages:
+  - build
+
+before_script:
+  - cd build
+  - ./fast_build.sh
+
+build:
+  stage: build
+
+  script:
+    - ./build.py --release
+
+  tags:
+    - fastogt
+
