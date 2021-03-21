@@ -9,7 +9,7 @@ stages:
 before_script:
   - cd build/env
   - ./fast_build_fastocloud_env_for_dev.sh
-  - cd ..
+  - cd ../
 
 build:
   stage: build
