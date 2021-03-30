@@ -256,13 +256,17 @@ elements_line_t build_video_encoder(const std::string& codec,
     } else {
       int bitrate = *video_bitrate;
       if (codec_element->GetPluginName() == ElementOpenH264Enc::GetPluginName()) {
-        // bitrate *= 1024;
+        // bits per second
       } else if (codec_element->GetPluginName() == ElementNvH264Enc::GetPluginName()) {
-        // bitrate *= 1024;
+        bitrate /= 1024;
         codec_element->SetProperty("rc-mode", 2);  // constant
       } else if (codec_element->GetPluginName() == ElementNvH265Enc::GetPluginName()) {
-        // bitrate *= 1024;
+        bitrate /= 1024;
         codec_element->SetProperty("rc-mode", 1);  // constant
+      } else if (codec_element->GetPluginName() == ElementX264Enc::GetPluginName()) {
+        bitrate /= 1024;
+      } else if (codec_element->GetPluginName() == ElementX265Enc::GetPluginName()) {
+        bitrate /= 1024;
       } else if (codec_element->GetPluginName() == ElementVAAPIH264Enc::GetPluginName()) {
         codec_element->SetProperty("rate-control", 2);  // constant
       } else if (codec_element->GetPluginName() == ElementMFXH264Enc::GetPluginName()) {
