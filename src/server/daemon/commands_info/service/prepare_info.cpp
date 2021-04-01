@@ -33,7 +33,6 @@
 #define PREPARE_SERVICE_INFO_DATA_DIRECTORY_FIELD "data_directory"
 
 #define SAVE_DIRECTORY_FIELD_PATH "path"
-#define SAVE_DIRECTORY_FIELD_CONTENT "content"
 #define SAVE_DIRECTORY_FIELD_RESULT "result"
 #define SAVE_DIRECTORY_FIELD_ERROR "error"
 
@@ -51,15 +50,6 @@ json_object* MakeDirectoryStateResponce(const DirectoryState& dir) {
     ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_PATH, path_str));
     if (dir.is_valid) {
       ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_RESULT, OK_RESULT));
-      json_object* jcontent = json_object_new_array();
-      if (dir.content) {
-        const auto content = *dir.content;
-        for (const common::file_system::ascii_file_string_path& file : content) {
-          const auto path = file.GetPath();
-          json_object_array_add(jcontent, json_object_new_string(path.c_str()));
-        }
-      }
-      ignore_result(common::serializer::json_set_array(obj, SAVE_DIRECTORY_FIELD_CONTENT, jcontent));
     } else {
       ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_ERROR, dir.error_str));
     }
@@ -163,7 +153,7 @@ common::Error PrepareInfo::DoDeSerialize(json_object* serialized) {
 }
 
 DirectoryState::DirectoryState(const std::string& dir_str, const char* k)
-    : key(k), dir(), content(), is_valid(false), error_str() {
+    : key(k), dir(), is_valid(false), error_str() {
   if (dir_str.empty()) {
     error_str = "Invalid input.";
     return;
@@ -178,12 +168,6 @@ DirectoryState::DirectoryState(const std::string& dir_str, const char* k)
   }
 
   is_valid = true;
-}
-
-void DirectoryState::LoadContent() {
-  if (is_valid) {
-    content = common::file_system::ScanFolder(dir, "*.*", true);
-  }
 }
 
 Directories::Directories(const PrepareInfo& sinf)
