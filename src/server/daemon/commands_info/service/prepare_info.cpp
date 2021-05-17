@@ -14,12 +14,6 @@
 
 #include "server/daemon/commands_info/service/prepare_info.h"
 
-#include <string>
-
-#include <common/file_system/file_system.h>
-#include <common/file_system/file_system_utils.h>
-#include <common/file_system/string_path_utils.h>
-
 #include "base/utils.h"
 
 #define OK_RESULT "OK"
@@ -42,21 +36,15 @@ namespace service {
 
 namespace {
 json_object* MakeDirectoryStateResponce(const DirectoryState& dir) {
-  json_object* obj_dir = json_object_new_object();
-
   json_object* obj = json_object_new_object();
-  {
-    const std::string path_str = dir.dir.GetPath();
-    ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_PATH, path_str));
-    if (dir.is_valid) {
-      ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_RESULT, OK_RESULT));
-    } else {
-      ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_ERROR, dir.error_str));
-    }
+  const std::string path_str = dir.dir.GetPath();
+  ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_PATH, path_str));
+  if (dir.is_valid) {
+    ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_RESULT, OK_RESULT));
+  } else {
+    ignore_result(common::serializer::json_set_string(obj, SAVE_DIRECTORY_FIELD_ERROR, dir.error_str));
   }
-
-  ignore_result(common::serializer::json_set_object(obj_dir, dir.key.c_str(), obj));
-  return obj_dir;
+  return obj;
 }
 }  // namespace
 
@@ -152,8 +140,7 @@ common::Error PrepareInfo::DoDeSerialize(json_object* serialized) {
   return common::Error();
 }
 
-DirectoryState::DirectoryState(const std::string& dir_str, const char* k)
-    : key(k), dir(), is_valid(false), error_str() {
+DirectoryState::DirectoryState(const std::string& dir_str) : dir(), is_valid(false), error_str() {
   if (dir_str.empty()) {
     error_str = "Invalid input.";
     return;
@@ -171,23 +158,25 @@ DirectoryState::DirectoryState(const std::string& dir_str, const char* k)
 }
 
 Directories::Directories(const PrepareInfo& sinf)
-    : feedback_dir(sinf.GetFeedbackDirectory(), PREPARE_SERVICE_INFO_FEEDBACK_DIRECTORY_FIELD),
-      timeshift_dir(sinf.GetTimeshiftsDirectory(), PREPARE_SERVICE_INFO_TIMESHIFTS_DIRECTORY_FIELD),
-      hls_dir(sinf.GetHlsDirectory(), PREPARE_SERVICE_INFO_HLS_DIRECTORY_FIELD),
-      vods_dir(sinf.GetVodsDirectory(), PREPARE_SERVICE_INFO_VODS_DIRECTORY_FIELD),
-      cods_dir(sinf.GetCodsDirectory(), PREPARE_SERVICE_INFO_CODS_DIRECTORY_FIELD),
-      proxy_dir(sinf.GetProxyDirectory(), PREPARE_SERVICE_INFO_PROXY_DIRECTORY_FIELD),
-      data_dir(sinf.GetDataDirectory(), PREPARE_SERVICE_INFO_DATA_DIRECTORY_FIELD) {}
+    : feedback_dir(sinf.GetFeedbackDirectory()),
+      timeshift_dir(sinf.GetTimeshiftsDirectory()),
+      hls_dir(sinf.GetHlsDirectory()),
+      vods_dir(sinf.GetVodsDirectory()),
+      cods_dir(sinf.GetCodsDirectory()),
+      proxy_dir(sinf.GetProxyDirectory()),
+      data_dir(sinf.GetDataDirectory()) {}
 
 std::string MakeDirectoryResponce(const Directories& dirs) {
-  json_object* obj = json_object_new_array();
-  json_object_array_add(obj, MakeDirectoryStateResponce(dirs.feedback_dir));
-  json_object_array_add(obj, MakeDirectoryStateResponce(dirs.timeshift_dir));
-  json_object_array_add(obj, MakeDirectoryStateResponce(dirs.hls_dir));
-  json_object_array_add(obj, MakeDirectoryStateResponce(dirs.vods_dir));
-  json_object_array_add(obj, MakeDirectoryStateResponce(dirs.cods_dir));
-  json_object_array_add(obj, MakeDirectoryStateResponce(dirs.proxy_dir));
-  json_object_array_add(obj, MakeDirectoryStateResponce(dirs.data_dir));
+  json_object* obj = json_object_new_object();
+  json_object_object_add(obj, PREPARE_SERVICE_INFO_FEEDBACK_DIRECTORY_FIELD,
+                         MakeDirectoryStateResponce(dirs.feedback_dir));
+  json_object_object_add(obj, PREPARE_SERVICE_INFO_TIMESHIFTS_DIRECTORY_FIELD,
+                         MakeDirectoryStateResponce(dirs.timeshift_dir));
+  json_object_object_add(obj, PREPARE_SERVICE_INFO_HLS_DIRECTORY_FIELD, MakeDirectoryStateResponce(dirs.hls_dir));
+  json_object_object_add(obj, PREPARE_SERVICE_INFO_VODS_DIRECTORY_FIELD, MakeDirectoryStateResponce(dirs.vods_dir));
+  json_object_object_add(obj, PREPARE_SERVICE_INFO_CODS_DIRECTORY_FIELD, MakeDirectoryStateResponce(dirs.cods_dir));
+  json_object_object_add(obj, PREPARE_SERVICE_INFO_PROXY_DIRECTORY_FIELD, MakeDirectoryStateResponce(dirs.proxy_dir));
+  json_object_object_add(obj, PREPARE_SERVICE_INFO_DATA_DIRECTORY_FIELD, MakeDirectoryStateResponce(dirs.data_dir));
   std::string obj_str = json_object_get_string(obj);
   json_object_put(obj);
   return obj_str;

@@ -60,9 +60,8 @@ class PrepareInfo : public common::serializer::JsonSerializer<PrepareInfo> {
 };
 
 struct DirectoryState {
-  DirectoryState(const std::string& dir_str, const char* k);
+  explicit DirectoryState(const std::string& dir_str);
 
-  std::string key;
   common::file_system::ascii_directory_string_path dir;
   bool is_valid;
   std::string error_str;
